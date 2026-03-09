@@ -45,8 +45,12 @@ cp -v "$TMPDIR/package/hornet"       "$INSTALL_DIR/"
 cp -v "$TMPDIR/package/area-zero.sh" "$INSTALL_DIR/"
 chmod +x "$INSTALL_DIR/multirole" "$INSTALL_DIR/hornet" "$INSTALL_DIR/area-zero.sh"
 
-echo "==> Installing Boost runtime library..."
-sudo cp -v "$TMPDIR/package/libboost_filesystem.so.1.90.0" /usr/local/lib/
+echo "==> Installing Boost runtime libraries..."
+sudo cp -v "$TMPDIR"/package/libboost_*.so.* /usr/local/lib/
+# Ensure /usr/local/lib is in the dynamic linker search path
+if [[ ! -f /etc/ld.so.conf.d/local.conf ]]; then
+    echo "/usr/local/lib" | sudo tee /etc/ld.so.conf.d/local.conf
+fi
 sudo ldconfig
 
 # Deploy config (always overwrite — config is version-controlled in the CI repo)

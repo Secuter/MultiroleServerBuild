@@ -47,7 +47,7 @@ jobs:
           wget -q https://archives.boost.io/release/1.90.0/source/boost_1_90_0.tar.gz
           tar xzf boost_1_90_0.tar.gz
           cd boost_1_90_0
-          ./bootstrap.sh --with-libraries=filesystem --with-toolset=clang
+          ./bootstrap.sh --with-toolset=clang
           sudo ./b2 toolset=clang install --prefix=/usr/local -j"$(nproc)" 2>&1 | tail -5
 
       - name: Meson build
@@ -69,7 +69,10 @@ jobs:
           cp upstream/build/hornet dist/package/
           cp config.json dist/package/
           cp upstream/util/area-zero.sh dist/package/
-          cp /usr/local/lib/libboost_filesystem.so.1.90.0 dist/package/
+          # Copy all boost .so files the binaries actually need
+          for bin in upstream/build/multirole upstream/build/hornet; do
+            ldd "$bin" | awk '/libboost.*=> \/usr\/local\/lib/ {print $3}' | xargs -I{} cp -v {} dist/package/
+          done
           chmod +x dist/package/multirole dist/package/hornet dist/package/area-zero.sh
           tar -C dist/package -czf "dist/${RELEASE_ASSET}" .
 
