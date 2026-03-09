@@ -1,17 +1,11 @@
 #!/usr/bin/env bash
-# update-server.sh — Download and install the latest Multirole build from GitHub Releases.
-#
-# Usage:
-#   ./update-server.sh [INSTALL_DIR]
-#
-# INSTALL_DIR defaults to the directory where the script lives.
-# Adjust SERVICE_NAME if you run multirole as a systemd service.
+# Download and install the latest Multirole build from GitHub Releases.
 
 set -euo pipefail
 
 # ── Configuration ────────────────────────────────────────────────────────────
 RELEASE_URL="https://github.com/Secuter/MultiroleServerBuild/releases/download/continuous/multirole-linux-x64.tar.gz"
-INSTALL_DIR="${1:-$(dirname "$(realpath "$0")")}"
+INSTALL_DIR="/home/ubuntu/Multirole"
 SERVICE_NAME="multirole"   # systemd service name — leave empty if not using systemd
 # ─────────────────────────────────────────────────────────────────────────────
 

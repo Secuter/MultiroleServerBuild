@@ -5,8 +5,8 @@ After=network.target
 [Service]
 Type=simple
 User=ubuntu
-WorkingDirectory=/Multirole
-ExecStart=/Multirole/multirole
+WorkingDirectory=/home/ubuntu/Multirole
+ExecStart=/home/ubuntu/Multirole/multirole
 Restart=on-failure
 RestartSec=5
 
