@@ -4,7 +4,7 @@
 set -euo pipefail
 
 # ── Configuration ────────────────────────────────────────────────────────────
-RELEASE_URL="https://github.com/Secuter/MultiroleServerBuild/releases/download/continuous/multirole-linux-x64.tar.gz"
+RELEASE_URL="https://github.com/Secuter/MultiroleServerBuild/releases/latest/download/multirole-linux-x64.tar.gz"
 INSTALL_DIR="/home/ubuntu/Multirole"
 SERVICE_NAME="multirole"   # systemd service name — leave empty if not using systemd
 # ─────────────────────────────────────────────────────────────────────────────
@@ -46,7 +46,11 @@ cp -v "$TMPDIR/package/area-zero.sh" "$INSTALL_DIR/"
 chmod +x "$INSTALL_DIR/multirole" "$INSTALL_DIR/hornet" "$INSTALL_DIR/area-zero.sh"
 
 echo "==> Installing Boost runtime libraries..."
-sudo cp -v "$TMPDIR"/package/libboost_*.so.* /usr/local/lib/
+if ls "$TMPDIR"/package/libboost_*.so.* 1>/dev/null 2>&1; then
+    sudo cp -v "$TMPDIR"/package/libboost_*.so.* /usr/local/lib/
+else
+    echo "    WARNING: No Boost libraries found in artifact — skipping (must be installed manually)"
+fi
 # Ensure /usr/local/lib is in the dynamic linker search path
 if [[ ! -f /etc/ld.so.conf.d/local.conf ]]; then
     echo "/usr/local/lib" | sudo tee /etc/ld.so.conf.d/local.conf

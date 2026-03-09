@@ -10,7 +10,6 @@ permissions:
 
 env:
   UPSTREAM_REPO: DyXel/Multirole
-  RELEASE_TAG: continuous
   RELEASE_ASSET: multirole-linux-x64.tar.gz
 
 jobs:
@@ -27,7 +26,26 @@ jobs:
           path: upstream
           fetch-depth: 1
 
+      - name: Check if upstream changed
+        id: check
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          UPSTREAM_SHA=$(git -C upstream rev-parse HEAD)
+          echo "upstream_sha=$UPSTREAM_SHA" >> "$GITHUB_OUTPUT"
+          # Get the SHA stored in the last release body, if any
+          LAST_SHA=$(gh release list --repo "$GITHUB_REPOSITORY" --limit 1 --json tagName --jq '.[0].tagName' 2>/dev/null || echo "")
+          LAST_BODY=$(gh release view "$LAST_SHA" --repo "$GITHUB_REPOSITORY" --json body --jq '.body' 2>/dev/null || echo "")
+          if echo "$LAST_BODY" | grep -q "$UPSTREAM_SHA"; then
+            echo "No upstream changes since last build — skipping."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Upstream changed — proceeding with build."
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Install dependencies
+        if: steps.check.outputs.changed == 'true'
         run: |
           sudo apt-get update
           sudo apt-get --yes --no-install-recommends install \
@@ -43,6 +61,7 @@ jobs:
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
       - name: Build Boost
+        if: steps.check.outputs.changed == 'true'
         run: |
           wget -q https://archives.boost.io/release/1.90.0/source/boost_1_90_0.tar.gz
           tar xzf boost_1_90_0.tar.gz
@@ -51,6 +70,7 @@ jobs:
           sudo ./b2 toolset=clang install --prefix=/usr/local -j"$(nproc)" 2>&1 | tail -5
 
       - name: Meson build
+        if: steps.check.outputs.changed == 'true'
         working-directory: upstream
         run: |
           export CC=clang
@@ -59,10 +79,12 @@ jobs:
           meson compile -C build -j"$(nproc)"
 
       - name: Inject secrets into config
+        if: steps.check.outputs.changed == 'true'
         run: |
           sed -i 's/__WEBHOOK_TOKEN__/${{ secrets.WEBHOOK_TOKEN }}/g' config.json
 
       - name: Package artifact
+        if: steps.check.outputs.changed == 'true'
         run: |
           mkdir -p dist/package
           cp upstream/build/multirole dist/package/
@@ -77,12 +99,13 @@ jobs:
           tar -C dist/package -czf "dist/${RELEASE_ASSET}" .
 
       - name: Publish release asset
+        if: steps.check.outputs.changed == 'true'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ env.RELEASE_TAG }}
-          name: Continuous Linux Build
+          tag_name: build-${{ steps.check.outputs.upstream_sha }}
+          name: Build ${{ steps.check.outputs.upstream_sha }}
           body: |
-            Automated build from `${{ env.UPSTREAM_REPO }}`
-          prerelease: true
+            Automated build from [`${{ env.UPSTREAM_REPO }}`](https://github.com/${{ env.UPSTREAM_REPO }}/commit/${{ steps.check.outputs.upstream_sha }})
+            Upstream commit: `${{ steps.check.outputs.upstream_sha }}`
+          prerelease: false
           files: dist/${{ env.RELEASE_ASSET }}
-          overwrite_files: true
