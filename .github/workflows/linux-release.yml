@@ -44,6 +44,8 @@ jobs:
             python3-pip
           python3 -m pip install --user meson
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          # PPA installs headers to /usr/include/boost1.83/ — symlink to standard path so meson can find them
+          sudo ln -sfn /usr/include/boost1.83/boost /usr/include/boost
 
       - name: Meson build
         working-directory: upstream
