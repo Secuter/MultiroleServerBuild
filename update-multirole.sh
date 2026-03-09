@@ -57,10 +57,6 @@ if [[ ! -f /etc/ld.so.conf.d/local.conf ]]; then
 fi
 sudo ldconfig
 
-# Deploy config (always overwrite — config is version-controlled in the CI repo)
-echo "==> Deploying config.json..."
-cp -v "$TMPDIR/package/config.json" "$INSTALL_DIR/"
-
 # Restart service if configured
 if [[ -n "$SERVICE_NAME" ]]; then
     echo "==> Starting $SERVICE_NAME..."

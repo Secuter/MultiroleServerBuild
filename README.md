@@ -1,24 +1,28 @@
 # MultiroleServerBuild
 
-Automatically publish pre-build artifact of [DyXel/Multirole](https://github.com/DyXel/Multirole) for Linux x64 (OS Ubuntu 22.04 or compatible).
+Automated builds of [DyXel/Multirole](https://github.com/DyXel/Multirole) for Linux x64 (Ubuntu 22.04 or compatible).
 
-The artifact contains:
+Each release artifact contains:
 - `multirole` — main server binary
 - `hornet` — core wrapper process
 - `area-zero.sh` — utility script
-- `config.json` — server configuration
-- `libboost_*.so.*` — bundled Boost runtime libraries (built from source)
+- `libboost_*.so.*` — bundled Boost 1.90 runtime libraries
 
-## Update script
+## Configuration
 
-Run manually 'update-multirole.sh' on the server to update to the latest artifact.
+Create `config.json` in your install directory. See the [Multirole repo](https://github.com/DyXel/Multirole) for the format and available options.
+
+## Updating
+
+Re-run the update script to pull the latest release:
+```bash
+./update-multirole.sh
+```
 
 ## systemd Service
 
-Create `/etc/systemd/system/multirole.service`:
-Example from 'multirole.service'
+An example service file is provided in `multirole.service`.
 
-Then enable and start:
 ```bash
 sudo systemctl daemon-reload
 sudo systemctl enable --now multirole
