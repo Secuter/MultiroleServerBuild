@@ -53,12 +53,16 @@ jobs:
           meson setup build -Dwarning_level=3
           meson compile -C build -j"$(nproc)"
 
+      - name: Inject secrets into config
+        run: |
+          sed -i 's/__WEBHOOK_TOKEN__/${{ secrets.WEBHOOK_TOKEN }}/g' config.json
+
       - name: Package artifact
         run: |
           mkdir -p dist/package
           cp upstream/build/multirole dist/package/
           cp upstream/build/hornet dist/package/
-          cp upstream/etc/config.json dist/package/
+          cp config.json dist/package/
           cp upstream/util/area-zero.sh dist/package/
           chmod +x dist/package/multirole dist/package/hornet dist/package/area-zero.sh
           tar -C dist/package -czf "dist/${RELEASE_ASSET}" .

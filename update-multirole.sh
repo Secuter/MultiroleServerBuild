@@ -55,14 +55,9 @@ cp -v "$TMPDIR/package/hornet"       "$INSTALL_DIR/"
 cp -v "$TMPDIR/package/area-zero.sh" "$INSTALL_DIR/"
 chmod +x "$INSTALL_DIR/multirole" "$INSTALL_DIR/hornet" "$INSTALL_DIR/area-zero.sh"
 
-# Copy config only if not already present (avoid overwriting local config)
-if [[ ! -f "$INSTALL_DIR/config.json" ]]; then
-    echo "==> Installing default config.json (not found in $INSTALL_DIR)..."
-    cp -v "$TMPDIR/package/config.json" "$INSTALL_DIR/"
-else
-    echo "==> Skipping config.json (already exists — not overwritten)"
-    echo "    New default is at: $TMPDIR/package/config.json (check for new options)"
-fi
+# Deploy config (always overwrite — config is version-controlled in the CI repo)
+echo "==> Deploying config.json..."
+cp -v "$TMPDIR/package/config.json" "$INSTALL_DIR/"
 
 # Restart service if configured
 if [[ -n "$SERVICE_NAME" ]]; then
