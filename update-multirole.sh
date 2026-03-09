@@ -24,15 +24,11 @@ dpkg -l | grep -E 'libfmt|libgit2|libsqlite3|libssl|libboost' || true
 echo ""
 echo "==> Installing/updating runtime dependencies..."
 sudo apt update -qq
-sudo apt install --yes --no-install-recommends software-properties-common
-sudo add-apt-repository --yes ppa:mhier/libboost-latest
-sudo apt update -qq
 sudo apt install --yes --no-install-recommends \
     libfmt8 \
     libgit2-1.1 \
     libsqlite3-0 \
-    libssl3 \
-    libboost1.83
+    libssl3
 
 echo ""
 echo "==> Downloading artifact from: $RELEASE_URL"
@@ -54,6 +50,10 @@ cp -v "$TMPDIR/package/multirole"    "$INSTALL_DIR/"
 cp -v "$TMPDIR/package/hornet"       "$INSTALL_DIR/"
 cp -v "$TMPDIR/package/area-zero.sh" "$INSTALL_DIR/"
 chmod +x "$INSTALL_DIR/multirole" "$INSTALL_DIR/hornet" "$INSTALL_DIR/area-zero.sh"
+
+echo "==> Installing Boost runtime library..."
+sudo cp -v "$TMPDIR/package/libboost_filesystem.so.1.90.0" /usr/local/lib/
+sudo ldconfig
 
 # Deploy config (always overwrite — config is version-controlled in the CI repo)
 echo "==> Deploying config.json..."
