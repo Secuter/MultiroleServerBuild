@@ -33,17 +33,22 @@ jobs:
         run: |
           UPSTREAM_SHA=$(git -C upstream rev-parse HEAD)
           echo "upstream_sha=$UPSTREAM_SHA" >> "$GITHUB_OUTPUT"
-          # Get the SHA stored in the last release body, if any
-          LAST_SHA=$(gh release list --repo "$GITHUB_REPOSITORY" --limit 1 --json tagName --jq '.[0].tagName' 2>/dev/null || echo "")
-          LAST_BODY=$(gh release view "$LAST_SHA" --repo "$GITHUB_REPOSITORY" --json body --jq '.body' 2>/dev/null || echo "")
-          if echo "$LAST_BODY" | grep -q "$UPSTREAM_SHA"; then
-            echo "No upstream changes since last build — skipping."
-            echo "changed=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "Upstream changed — proceeding with build."
+          BUILD_NUM=$(gh release list --repo "$GITHUB_REPOSITORY" --limit 1000 --json tagName --jq 'length' 2>/dev/null || echo "0")
+          echo "build_num=$((BUILD_NUM + 1))" >> "$GITHUB_OUTPUT"
+          # Always build on manual trigger; otherwise only if upstream changed
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "Manual trigger — forcing build."
             echo "changed=true" >> "$GITHUB_OUTPUT"
-            BUILD_NUM=$(gh release list --repo "$GITHUB_REPOSITORY" --limit 1000 --json tagName --jq 'length' 2>/dev/null || echo "0")
-            echo "build_num=$((BUILD_NUM + 1))" >> "$GITHUB_OUTPUT"
+          else
+            LAST_SHA=$(gh release list --repo "$GITHUB_REPOSITORY" --limit 1 --json tagName --jq '.[0].tagName' 2>/dev/null || echo "")
+            LAST_BODY=$(gh release view "$LAST_SHA" --repo "$GITHUB_REPOSITORY" --json body --jq '.body' 2>/dev/null || echo "")
+            if echo "$LAST_BODY" | grep -q "$UPSTREAM_SHA"; then
+              echo "No upstream changes since last build — skipping."
+              echo "changed=false" >> "$GITHUB_OUTPUT"
+            else
+              echo "Upstream changed — proceeding with build."
+              echo "changed=true" >> "$GITHUB_OUTPUT"
+            fi
           fi
 
       - name: Install dependencies
