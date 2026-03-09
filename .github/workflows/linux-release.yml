@@ -98,10 +98,13 @@ jobs:
           cp upstream/build/hornet dist/package/
           cp config.json dist/package/
           cp upstream/util/area-zero.sh dist/package/
-          # Copy all boost .so files the binaries actually need
-          for bin in upstream/build/multirole upstream/build/hornet; do
-            ldd "$bin" | awk '/libboost.*=> \/usr\/local\/lib/ {print $3}' | xargs -I{} cp -v {} dist/package/
-          done
+          echo "==> Boost libs in /usr/local/lib:"
+          ls /usr/local/lib/libboost*.so* || echo "NONE FOUND"
+          echo "==> Boost libs needed by binaries:"
+          ldd upstream/build/multirole upstream/build/hornet | grep boost || echo "NONE"
+          cp /usr/local/lib/libboost*.so.* dist/package/
+          echo "==> Package contents:"
+          ls dist/package/
           chmod +x dist/package/multirole dist/package/hornet dist/package/area-zero.sh
           tar -C dist/package -czf "dist/${RELEASE_ASSET}" .
 
