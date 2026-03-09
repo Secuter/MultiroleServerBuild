@@ -12,7 +12,7 @@ set -euo pipefail
 # ── Configuration ────────────────────────────────────────────────────────────
 RELEASE_URL="https://github.com/Secuter/MultiroleServerBuild/releases/download/continuous/multirole-linux-x64.tar.gz"
 INSTALL_DIR="${1:-$(dirname "$(realpath "$0")")}"
-SERVICE_NAME=""   # e.g. "multirole" — leave empty if not using systemd
+SERVICE_NAME="multirole"   # systemd service name — leave empty if not using systemd
 # ─────────────────────────────────────────────────────────────────────────────
 
 TMPDIR=$(mktemp -d)

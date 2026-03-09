@@ -1,0 +1,14 @@
+[Unit]
+Description=Multirole YGOPro Server
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/Multirole
+ExecStart=/Multirole/multirole
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
