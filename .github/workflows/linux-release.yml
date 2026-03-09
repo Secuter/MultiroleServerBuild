@@ -42,6 +42,8 @@ jobs:
           else
             echo "Upstream changed — proceeding with build."
             echo "changed=true" >> "$GITHUB_OUTPUT"
+            BUILD_NUM=$(gh release list --repo "$GITHUB_REPOSITORY" --limit 1000 --json tagName --jq 'length' 2>/dev/null || echo "0")
+            echo "build_num=$((BUILD_NUM + 1))" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Install dependencies
@@ -102,8 +104,8 @@ jobs:
         if: steps.check.outputs.changed == 'true'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: build-${{ steps.check.outputs.upstream_sha }}
-          name: Build ${{ steps.check.outputs.upstream_sha }}
+          tag_name: build-${{ steps.check.outputs.build_num }}
+          name: Build ${{ steps.check.outputs.build_num }}
           body: |
             Automated build from [`${{ env.UPSTREAM_REPO }}`](https://github.com/${{ env.UPSTREAM_REPO }}/commit/${{ steps.check.outputs.upstream_sha }})
             Upstream commit: `${{ steps.check.outputs.upstream_sha }}`
