@@ -30,13 +30,16 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
+          sudo apt-get --yes --no-install-recommends install software-properties-common
+          sudo add-apt-repository --yes ppa:mhier/libboost-latest
+          sudo apt-get update
           sudo apt-get --yes --no-install-recommends install \
             clang \
             libfmt-dev \
             libgit2-dev \
             libsqlite3-dev \
             libssl-dev \
-            libboost-all-dev \
+            libboost1.83-dev \
             ninja-build \
             python3-pip
           python3 -m pip install --user meson
