@@ -26,4 +26,7 @@ An example service file is provided in `multirole.service`.
 ```bash
 sudo systemctl daemon-reload
 sudo systemctl enable --now multirole
+
+sudo systemctl restart multirole
+systemctl status multirole
 ```
